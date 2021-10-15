@@ -23,7 +23,7 @@ img_headers = {
 }
 
 form = {
-    "ck": "Un0d",
+    "ck": "41WX",
     "captcha-solution": "church",
     "captcha-id": "3VjSrtv7u8GHJ5VFG0j6qJx0:en",
     "original-url": "https://www.douban.com/group/"

@@ -174,6 +174,7 @@ async def get_group_member(session, group_id):
     is_denied = None
     cnt = 0
     while not success or is_denied:  # 循环结构
+        await sleep(0.5)
         try:
             async with session.get(url, headers=headers) as response:  # 获取网页HTML
                 is_denied = response.url.__str__()[:33] == "https://www.douban.com/misc/sorry"  # 判断是否被拒绝
@@ -198,7 +199,7 @@ async def get_group_member(session, group_id):
                         return -1
                 else:
                     member_text = member_element[0].get_text()
-                    return eval(member_text[member_text.index("(") + 1:-1])  # 返回小组人数
+                    return eval(member_text[member_text.rfind("(") + 1:-1])  # 返回小组人数
         except:
             print("failed once")
 
@@ -207,9 +208,9 @@ async def main():
     async with aiohttp.ClientSession() as session:
         group_list = await get_group_id_list()  # 从数据库读取小组列表
         await PostSolution.main()
-        start = None
+        start = True
         for index, group_id in enumerate(group_list):
-            if start or group_id == "345244":
+            if start or group_id == "700332":
                 start = True
             else:
                 continue
