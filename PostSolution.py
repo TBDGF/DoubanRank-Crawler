@@ -23,7 +23,7 @@ img_headers = {
 }
 
 form = {
-    "ck": "41WX",
+    "ck": "vJ8n",
     "captcha-solution": "church",
     "captcha-id": "3VjSrtv7u8GHJ5VFG0j6qJx0:en",
     "original-url": "https://www.douban.com/group/"
@@ -36,7 +36,7 @@ async def fetch(session):
     is_access = None
     while not is_access:  # 循环，上一次的结果在下一次循环时提交
         try:
-            await sleep(0.3)
+            await sleep(0.5)
             async with session.post(url, headers=headers, data=form) as response:
 
                 if response.url.__str__()[:33] != "https://www.douban.com/misc/sorry":

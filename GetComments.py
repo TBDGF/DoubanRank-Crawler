@@ -36,6 +36,18 @@ async def insert_group_info(group_id, member, sum, page_cnt):
         conn.rollback()
 
 
+async def update_group_name(group_id, grou_name,group_url):
+    sql = "replace into group_list(group_id, group_name,group_url) values (%s, %s, %s)"
+    data = (group_id, grou_name,group_url)
+    try:
+        cursor.execute(sql, data)
+        conn.commit()
+        print("name updated")
+    except:
+        traceback.print_exc()
+        conn.rollback()
+
+
 async def delete_group_list_by_group_id(group_id):
     sql = """ DELETE FROM `group_list` WHERE `group_id`=%s """
     para = (group_id)
@@ -174,8 +186,8 @@ async def get_group_member(session, group_id):
     is_denied = None
     cnt = 0
     while not success or is_denied:  # 循环结构
-        await sleep(0.5)
         try:
+            await sleep(0.5)
             async with session.get(url, headers=headers) as response:  # 获取网页HTML
                 is_denied = response.url.__str__()[:33] == "https://www.douban.com/misc/sorry"  # 判断是否被拒绝
                 if not is_denied:  # 如果没有被拒绝，则获取网页元素
@@ -183,6 +195,7 @@ async def get_group_member(session, group_id):
                     soup = BeautifulSoup(text, "lxml")
                     member_element = soup.select(
                         "#content > div.grid-16-8.clearfix > div.aside > div.mod.side-nav > p:nth-child(1) > a")
+                    name_element = soup.select_one("#group-info > div > h1")
                     is_denied = len(member_element) <= 0
                 if is_denied:  # 如果被拒绝，则提交验证码，再次循环
                     if len(soup.select("#wrapper > div:nth-child(1) > ul > li:nth-child(1)")) > 0:  # 判断小组是否寄了
@@ -199,6 +212,9 @@ async def get_group_member(session, group_id):
                         return -1
                 else:
                     member_text = member_element[0].get_text()
+                    if name_element is not None:
+                        group_name = name_element.get_text().strip()
+                        await update_group_name(group_id, group_name,url)
                     return eval(member_text[member_text.rfind("(") + 1:-1])  # 返回小组人数
         except:
             print("failed once")
@@ -208,9 +224,9 @@ async def main():
     async with aiohttp.ClientSession() as session:
         group_list = await get_group_id_list()  # 从数据库读取小组列表
         await PostSolution.main()
-        start = True
+        start = False
         for index, group_id in enumerate(group_list):
-            if start or group_id == "700332":
+            if start or group_id == "18297":
                 start = True
             else:
                 continue
